@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express();
 const port = process.env.PORT || 5000;
 
@@ -38,12 +38,70 @@ async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
+
+    const movieCollection = client.db('moviePortal').collection('movie')
+
+    app.get('/movie',async(req,res) =>{
+      const cursor = movieCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    })
+
+    app.get('/movie/:id',async(req,res)=>{
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)}
+      const result = await movieCollection.findOne(query);
+      res.send(result);
+    })
+
+    app.post('/movie',async(req,res) =>{
+      const newMovie = req.body;
+      console.log(newMovie);
+      const result = await movieCollection.insertOne(newMovie);
+      res.send(result);
+    })
+
+    app.put('/movie/:id', async(req,res) =>{
+      const id = req.params.id;
+      const filter = {_id:new ObjectId(id)} 
+      const options = {upsert : true} ;
+      const updateMovie = req.body;
+      const Movie = {
+        $set :{
+          title : updateMovie.title,
+          genre: updateMovie.genere,
+          duration: updateMovie.duration,
+          releaseYear: updateMovie.releaseYear,
+          rating:updateMovie.rating,
+          summary: updateMovie.summary,
+          poster: updateMovie.poster
+        }
+      } 
+      const result = await movieCollection.updateOne(filter,Movie,options);
+      res.send(result);
+    })
+
+
+    app.delete('/movie/:id', async (req,res) =>{
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }
+      const result = await movieCollection.deleteOne(query);
+      res.send(result);
+    })
+
+
+
+
+
+
+
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
-    await client.close();
+    // await client.close();
   }
 }
 run().catch(console.dir);
