@@ -8,7 +8,7 @@ const port = process.env.PORT || 5000;
 
 // Middleware
 const corsOptions = {
-    origin: "http://localhost:5173", // Ensure frontend can access backend
+    origin: "https://movie-portal-client-ki3p5fovr-kamrun-nahers-projects.vercel.app", // Ensure frontend can access backend
     credentials: true,
     optionSuccessStatus: 200,
 };
@@ -27,7 +27,7 @@ const client = new MongoClient(uri, {
 
 async function run() {
     try {
-        await client.connect();
+        // await client.connect();
         console.log("✅ Connected to MongoDB!");
 
         const movieCollection = client.db('moviePortal').collection('movie');
